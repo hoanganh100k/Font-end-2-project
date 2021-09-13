@@ -1,3 +1,19 @@
+
+var player = new Player();
+var shops = new Shop();
+var timeNowPlay = 0;
+var pet = player.getPet;
+var timeNowFeed = pet.getTimeLunchCountdown / 1000;
+var timeLunchCountdown_now = pet.getTimeLunchCountdown;
+var timeCountdown = 0;
+var timeout = Time.toHHMMSS(timeCountdown);
+var foodArr = player.getFood;
+var _point = pet.getPoints();
+var _timedrop = 0;
+var _time_drop = 30000;
+var time_ponus = 0;
+var timeoutfeed = Time.toHHMMSS(timeNowFeed);
+
 const width = 1000;
 const height = 700;
 var btnShop;
@@ -6,11 +22,16 @@ var btnShopBackHome;
 var monney = 9999;
 var petNommal, petSad;
 var petFeel;
-let fellingProcess = 100; //Tính Bằng % 100 là 100%
+let fellingProcess = pet.getPoints(); //Tính Bằng % 100 là 100%
 let showBagStatus = false;
 let BagProcess = [];
-const shopItem = [[{ 'id': 0, 'name': 'Cat Food', 'price': 700, 'photo': './asset/ThucAn/cat_food.png' }, { 'id': 1, 'name': 'Fish Food', 'price': 1000, 'photo': './asset/ThucAn/fish_food.png' }, { 'id': 2, 'name': 'Milk', 'price': 3000, 'photo': './asset/ThucAn/milk.png' }],
-  , [{ 'id': 3, 'name': 'Len', 'price': 1000, 'photo': './asset/DoChoi/len.png' }, { 'id': 4, 'name': 'Mouse', 'price': 2000, 'photo': './asset/DoChoi/chuot.png' }]]
+const shopItem = [[
+  { 'id': 0, 'name': 'Cat Food', 'price': 700, 'photo': './asset/ThucAn/cat_food.png', 'times': 3 },
+  { 'id': 1, 'name': 'Fish Food', 'price': 1000, 'photo': './asset/ThucAn/fish_food.png', 'times': 4 },
+  { 'id': 2, 'name': 'Milk', 'price': 3000, 'photo': './asset/ThucAn/milk.png', 'times': 5 }
+],
+  , [{ 'id': 3, 'name': 'Len', 'price': 1000, 'photo': './asset/DoChoi/len.png', 'point': 1, 'time': 75000 },
+  { 'id': 4, 'name': 'Mouse', 'price': 2000, 'photo': './asset/DoChoi/chuot.png', 'point': 2, 'time': 150000 }]]
 
 var arrShopItem = [];
 var bagItem = [];
@@ -32,6 +53,7 @@ function preload() {
 
 function setup() {
   var tempArr = [];
+
   shopItem.forEach(element => {
     element.forEach(element => {
       tempArr.push({ 'id': element.id, 'btn': createImg(element.photo), 'price': element.price, 'photo': element.photo })
@@ -39,6 +61,7 @@ function setup() {
     arrShopItem.push(tempArr);
     tempArr = [];
   });
+
   //Event Buy
   arrShopItem.forEach(element => {
     element.forEach(element => {
@@ -51,6 +74,7 @@ function setup() {
       });
     });
   });
+
   bowl.mousePressed(() => {
     //Check Balo Item
     var z = findOdd(bagItem)
@@ -66,6 +90,7 @@ function setup() {
     BagProcess.forEach(element => {
       element.btnBag.mousePressed(() => {
         element.quality--;
+        feed_pet(element.key);
         if (element.quality <= 0) {
           bagItem.splice(element.key)
           element.btnBag.remove();
@@ -93,6 +118,52 @@ function setup() {
 
   });
   createCanvas(width, height);
+
+  const x = setInterval(function () {
+    //tăng thời gian
+    _timedrop += 1000;
+    time_ponus += 1000;
+    timeNowPlay += 1000;
+
+    //giữ điểm cảm xúc 100 trong 5p cộng 5000 tiền
+    if (time_ponus == 300000 && getPet.getPoint >= 1000) {
+      player.setPoint(getPet.getPoint + 5000);
+      time_ponus = 0;
+    }
+
+    //giảm điểm, nếu đang trong giờ ăn điểm giảm gấp đôi
+    if (_timedrop % _time_drop == 0) {
+      //nếu điểm cảm xúc == 0 ngưng setInterval (pet die)
+      if (pet.getPoint == 0) {
+        clearInterval(x);
+      }
+      if (pet.getLunchTime) {
+        _time_drop /= 2;
+      }
+      pet.setPoint = pet.getPoint - 1;
+    }
+
+    //cập nhật điểm liên tục
+    fellingProcess = pet.getPoints();
+
+    //đồng hồ cho ăn
+    if (timeNowFeed > 0) {
+      timeNowFeed--;
+      timeoutfeed = Time.toHHMMSS(timeNowFeed);
+    }
+
+    //thời gian hiện tại
+    timeLunchCountdown_now-=1000;
+
+    //set trạng thái đói
+    if (timeNowFeed == 0) {
+      pet.setLunchTime = true;
+    }
+
+    if (pet.getPoint <= 0) {
+      clearInterval(x);
+    }
+  }, 1000);
 }
 
 function draw() {
@@ -133,6 +204,9 @@ function screenCenter() {
   rect(30, 150, 20, 360, 20);
   fill(0, 0, 255);
   rect(30, 150, 20, Math.ceil(a), 20);
+
+  textSize(50);
+  text(timeoutfeed, 350, 250);
 
   //HidenShop
   arrShopItem.forEach(element => {
@@ -211,4 +285,35 @@ function bagRemoveAllItem() {
   BagProcess.forEach(element => {
     element.btnBag.remove();
   })
+}
+
+//cho ăn
+function feed_pet(id) {
+  player.feed(id, timeLunchCountdown_now);
+
+  timeLunchCountdown_now = pet.getTimeLunchCountdown;
+  timeNowFeed = pet.getTimeLunchCountdown / 1000;
+
+  pet.setLunchTime = false;
+  _time_drop = 30000;
+}
+
+//chơi đồ
+function play_toy() {
+  player.playToy(timeNowPlay);
+  _point = pet.getPoint();
+  timeNowPlay = 0;
+}
+
+//mua  đồ chơi
+function buy_toy(id) {
+  var _food = shops.buyToy(id);
+  player.buyToy(_food);
+}
+
+//mua thức ăn
+function buy_food(id) {
+  var _toy = shops.buyFood(id);
+  player.buyFood(_toy);
+  foodArr = player.getFood;
 }
