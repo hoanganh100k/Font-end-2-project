@@ -1,8 +1,11 @@
 # PET OF CARE
 
 #ENVIRONMENT:
+
 -Install WAMP of XAMP
+
 -Copy source in www file
+
 
 
 #IDEAL:
@@ -32,6 +35,7 @@
 +Players can click on the pet to pet and amuse the pet.
 
 +Pets will have an emotion bar that shows the current emotion.
+
 
 
 
