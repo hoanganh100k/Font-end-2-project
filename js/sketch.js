@@ -13,6 +13,7 @@ var _timedrop = 0;
 var _time_drop = 30000;
 var time_ponus = 0;
 var timeoutfeed = Time.toHHMMSS(timeNowFeed);
+var playGame = false;
 
 const width = 1000;
 const height = 700;
@@ -44,16 +45,19 @@ function preload() {
   play = loadImage('./asset/iconButton/PlayPet.png');
   bgShop = loadImage('./asset/background/backgroundshop.PNG');
   btnShopBackHome = createImg('./asset/iconButton/house1.png');
-
+  playBtn = createImg('./asset/iconButton/PlayPet.png');
   //Cat
   petNommal = loadImage('./asset/Meo/binhthuong/catnormal.png');
   petSad = loadImage('./asset/Meo/buon/catsad.png');
-
+  clock = loadImage('./asset/clock.png');
 }
 
 function setup() {
+  playBtn.size(100,100)
+  playBtn.mousePressed(()=>{
+    playGame = true;
+  })
   var tempArr = [];
-
   shopItem.forEach(element => {
     element.forEach(element => {
       tempArr.push({ 'id': element.id, 'btn': createImg(element.photo), 'price': element.price, 'photo': element.photo })
@@ -167,22 +171,46 @@ function setup() {
 }
 
 function draw() {
-  if (mode == 0) {
-    screenCenter();
-    if (showBagStatus == true) {
-      showBag();
-    } else {
+  if(playGame == true){
+    if (mode == 0) {
+      screenCenter();
+      if (showBagStatus == true) {
+        showBag();
+      } else {
+        bagRemoveAllItem();
+      }
+    } else if (mode == 1) {
       bagRemoveAllItem();
+      showBagStatus = false;
+      screenShop();
     }
-  } else if (mode == 1) {
-    bagRemoveAllItem();
-    showBagStatus = false;
-    screenShop();
+  }else{
+    screenPlay();
   }
 }
-function screenCenter() {
+function screenPlay(){
   background(bg);
-
+  playBtn.position(450, 350);
+  textSize(50)
+  text('Ấn play để chơi', 325, 325);
+  //HidenShop
+  arrShopItem.forEach(element => {
+    element.forEach(element => {
+      element.btn.position(0, 0)
+      element.btn.size(0, 0)
+    });
+  });
+  btnShopBackHome.position(0, 0);
+  btnShopBackHome.size(0, 0);
+  btnShop.position(0, 0);
+  btnShop.size(0, 0)
+  bowl.position(0, 0);
+  bowl.size(0, 0);
+}
+function screenCenter() {
+  playBtn.position(0, 0);
+  playBtn.size(0,0);
+  background(bg);
   btnShop.position(width - 150, 30);
   btnShop.size(150, 100)
   btnShopBackHome.position(0, 0);
@@ -197,16 +225,16 @@ function screenCenter() {
   fill('#e2de8a');
   textSize(60);
   text(monney, 85, 90);
-  image(play, 0, height - 150, 100, 100);
   //Eat icon
   //Feel Pet
   var a = 360 * fellingProcess / 100;
   rect(30, 150, 20, 360, 20);
   fill(0, 0, 255);
   rect(30, 150, 20, Math.ceil(a), 20);
-
-  textSize(50);
-  text(timeoutfeed, 350, 250);
+  //time 
+  image(clock,600,-50,250,250)
+  textSize(30);
+  text(timeoutfeed, 675, 95);
 
   //HidenShop
   arrShopItem.forEach(element => {
@@ -254,13 +282,20 @@ function showBag() {
   rect(550, 150, 400, 200);
   x = 570;
   y = 150;
-  BagProcess.forEach(element => {
-    element.btnBag.position(x, y)
-    textSize(15);
+  if(BagProcess.length != 0){
+    BagProcess.forEach(element => {
+      element.btnBag.position(x, y)
+      textSize(15);
+      fill('#D71F5F');
+      text('Số Lượng: ' + element.quality, x, 250);
+      x += 100
+    });
+  }else{
+    textSize(25);
     fill('#D71F5F');
-    text('Số Lượng: ' + element.quality, x, 250);
-    x += 100
-  });
+    text('Túi đang rỗng!!', 650, 250);
+  }
+  
 }
 function itemBagByID(id) {
   var temp = false;
